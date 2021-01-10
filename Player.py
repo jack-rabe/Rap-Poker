@@ -23,13 +23,6 @@ pygame.display.set_caption('Rap Poker')
 
 session = requests.Session()
 
-GREEN = (0, 200, 0)  # background color
-BLUE = (0, 0, 255)
-RED = (200, 0, 0)
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GRAY = (128, 128, 128)  # color of the buttons
-LIGHT_GRAY = (150, 150, 150)  # color of selected buttons
 
 check_msg = BTN_FONT.render('Check', True, BLACK)
 raise_msg = BTN_FONT.render('Raise', True, BLACK)
@@ -38,14 +31,6 @@ title_msg = TITLE_FONT.render('Rap Poker', False, BLACK)
 rules_msg = MENU_FONT.render('Rules', True, BLACK)
 play_msg = MENU_FONT.render('Play', True, BLACK)  # draw the play button
 
-check_rect = (25, 585, 125, 40)
-raise_rect = (25, 630, 125, 40)
-fold_rect = (25, 675, 125, 40)
-play_rect = (300, 414, 150, 50)
-rules_rect = (300, 480, 150, 50)
-draw_pile_rect = (270, 300, 90, 125)
-dp_rect = (375, 300, 93, 127)
-hand_rect = (180, 525, 465, 125)
 
 def raw_card_back():  # load the image of the back of card
     card_image_url = session.get("http://res.freestockphotos.biz/originals/15/15686-illustration-of-a-play-card-"
