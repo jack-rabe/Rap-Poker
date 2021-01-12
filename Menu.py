@@ -1,5 +1,7 @@
 from Game import *
+from Constants import rules_txt
 import random
+import ctypes  # creates the rules message box
 
 def draw_menu():
     def draw_bg():
@@ -16,7 +18,8 @@ def draw_menu():
         pygame.draw.rect(window, color, rules_rect)
         window.blit(rules_msg, (320, 487))
 
-    while True:
+    running = True
+    while running:
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
         draw_bg()
@@ -28,7 +31,8 @@ def draw_menu():
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if is_over(rules_rect, mouse_x, mouse_y):
-                    print("rules clicked")  # add a rules info slide!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# add a rules info slide!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    ctypes.windll.user32.MessageBoxW(0, rules_txt, "Rap Poker Rules", 1)
                     break
                 elif is_over(play_rect, mouse_x, mouse_y):  # start the game
                     print("start playing")  # ask for a name???????????????
@@ -41,6 +45,7 @@ def draw_menu():
                         game.players.append(ComputerPlayer(new_name, game, i))
 
                     game.play_hand()  # this temp!!!!!!!!!!!!
+                    running = False
 
         pygame.display.update()
 

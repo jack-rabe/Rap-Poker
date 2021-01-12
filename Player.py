@@ -1,13 +1,10 @@
 import pygame
 import io
-import requests
+# import requests
+
+from Constants import *
 
 pygame.init()
-
-NAMES = ["Jim", "Tim", "Jenny", "Jorge", "Tyrone", "Kate", "Jerry", "Francis", "Riley", "Todd",
-         "Lucy", "Frank", "Kylie", "Camila", "Alexa", "Alayna", "Carter", "Ankit", "Mark",
-         "Nathan", "Lauren", "Dylan", "Ava", "Matt", "Jacob"]
-START_MONEY = 500
 
 NAME_FONT = pygame.font.SysFont(None, 30)
 TITLE_FONT = pygame.font.SysFont(None, 75, True)
@@ -21,15 +18,17 @@ window = pygame.display.set_mode([WIDTH, HEIGHT])
 pygame.display.set_caption('Rap Poker')
 #pygame.display.set_icon(card_back) decide on this later!!!!!!!!!!!
 
-session = requests.Session()
-
-
 check_msg = BTN_FONT.render('Check', True, BLACK)
 raise_msg = BTN_FONT.render('Raise', True, BLACK)
 fold_msg = BTN_FONT.render('Fold', True, BLACK)
+bet_msg = BTN_FONT.render('Bet', True, BLACK)
+rap_msg = BTN_FONT.render('Rap', True, BLACK)
+plus_msg = BTN_FONT.render('+', True, BLACK)
+minus_msg = BTN_FONT.render('-', True, BLACK)
+
 title_msg = TITLE_FONT.render('Rap Poker', False, BLACK)
 rules_msg = MENU_FONT.render('Rules', True, BLACK)
-play_msg = MENU_FONT.render('Play', True, BLACK)  # draw the play button
+play_msg = MENU_FONT.render('Play', True, BLACK)
 
 
 def raw_card_back():  # load the image of the back of card
@@ -57,6 +56,7 @@ class Player:
         self.has_folded = False
         self.has_rapped = False
 
+
     def display_hand(self):
         for index, card in enumerate(self.hand):
             pos = (index * 75 + 180, 525)
@@ -66,48 +66,58 @@ class Player:
         name_str = NAME_FONT.render(f"{self.name}  ${self.money}", True, BLACK)
         window.blit(name_str, (330, 690))  # this is overridden for the computer players
 
-    def handle_draw(self):  # handles the pre-rap moves
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+    def handle_draw(self, mouse_x, mouse_y):
+        if is_over(dp_rect, mouse_x, mouse_y) and len(self.hand) == 5:  # draw from the discard pile
+            dis_pile = self.game.discard_pile
+            self.hand.append(dis_pile.pop())  # it should never be empty when this is called
+        else:  # draw from the unknown pile
+            self.hand.append(self.game.draw_card())
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                # draw from the discard pile
-                if is_over(dp_rect, mouse_x, mouse_y) and len(self.hand) == 5:
-                    dis_pile = self.game.discard_pile
-                    self.hand.append(dis_pile.pop())  # it should never be empty when this is called
+    def handle_discard(self, mouse_x, mouse_y):
+        pop_index = (mouse_x - 180) // 75  # offset by the x position of the far left card
+        pop_index = 5 if pop_index > 5 else pop_index  # keep index in range
+        self.game.discard_pile.append(self.hand.pop(pop_index))
 
-                # draw from the unknown pile
-                elif is_over(draw_pile_rect, mouse_x, mouse_y) and len(self.hand) == 5:
-                    self.hand.append(self.game.draw_card())
 
-                # discard a card
-                elif is_over(hand_rect, mouse_x, mouse_y) and len(self.hand) == 6:
-                    pop_index = (mouse_x - 180) // 75  # offset by the x position of the far left card
-                    pop_index = 5 if pop_index > 5 else pop_index  # keep index in range
-                    self.game.discard_pile.append(self.hand.pop(pop_index))
-                    return True
-
-        return False
-
-    def set_bet(self):  # handles the end of the turn
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if is_over(check_rect, mouse_x, mouse_y):
-                    pass  # nothing needs to be done
-                elif is_over(raise_rect, mouse_x, mouse_y):
-                    pass  # add code here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                # elif is_over(fold_rect, mouse_x, mouse_y):
-                #     pass
-                else:
-                    return False
-
+    def set_bet(self, mouse_x, mouse_y):  # handles the end of the turn, returns a boolean (made a bet)
+            if is_over(check_rect, mouse_x, mouse_y):
+                return False
+            elif is_over(rap_rect, mouse_x, mouse_y):  # handle betting and wrapping at the same time?????????????????
+                self.has_rapped = True
+                self.game.rapping_player = self
+                return False
+            elif is_over(bet_rect, mouse_x, mouse_y):
                 return True
+
+    def handle_input(self, betting, has_discarded, *args):
+        while True:
+            self.game.display_all(betting=betting, has_discarded=has_discarded)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_x, mouse_y = pygame.mouse.get_pos()
+                    for rect in args:
+                        if is_over(rect, mouse_x, mouse_y):
+                            return (mouse_x, mouse_y)  # the position of a mouse click that does something
+
+    def handle_bet(self, mouse_x, mouse_y):  # returns a tuple (True if they fold, value amount of raise)
+        if is_over(fold_rect, mouse_x, mouse_y):
+            return (True, 0)
+        elif is_over(check_rect, mouse_x, mouse_y):
+            #self.money -= cur_bet
+            return (False, 0)
+        elif is_over(check_rect, mouse_x, mouse_y):
+            num = 5  # change this later!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            return (False, num)
+
+    def handle_already_bet(self, mouse_x, mouse_y):  # returns a boolean, will they fold
+        if is_over(check_rect, mouse_x, mouse_y):
+            return False
+        elif is_over(fold_rect, mouse_x, mouse_y):
+            return True
+
 
 def is_over(rect, x, y):
     left = rect[0]
