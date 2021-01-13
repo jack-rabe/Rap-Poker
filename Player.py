@@ -23,20 +23,24 @@ class Player:
         self.has_folded = False
         self.has_rapped = False
 
+    # resets all of the necessary instance variables
     def reset(self):
         self.hand = []
         self.has_folded = False
         self.has_rapped = False
 
+    # shows the cards of the human player
     def display_hand(self, show_front=True):  # show front is only for overloading
         for index, card in enumerate(self.hand):
             pos = (index * 75 + 180, 525)
             window.blit(card.image, pos)
 
+    # shows the human player's name and amount of money
     def display_name_and_money(self):
         name_str = NAME_FONT.render(f"{self.name}  ${self.money}", True, BLACK)
         window.blit(name_str, (330, 690))
 
+    # draw a card from either the discard or draw pile
     def handle_draw(self):
         mouse_x, mouse_y = self.handle_input(dp_rect, draw_pile_rect)
 
@@ -46,6 +50,7 @@ class Player:
         else:  # draw from the unknown pile
             self.hand.append(self.game.draw_card())
 
+    # discard one of the cards in a six-card hand
     def handle_discard(self):
         mouse_x, mouse_y = self.handle_input(hand_rect)
 
@@ -53,9 +58,10 @@ class Player:
         pop_index = 5 if pop_index > 5 else pop_index  # keep index in range
         self.game.discard_pile.append(self.hand.pop(pop_index))
 
+    # choose whether to set a bet and how much to set it for
     def set_bet(self, final=False):  # returns 0 if no bet is made (or is wrapping) else returns the amount of the bet
-        discarded = False if final else True
-        mouse_x, mouse_y = self.handle_input(check_rect, rap_rect, bet_rect, discarded=discarded, final=final)
+        buttons = "final" if final else "discarded"
+        mouse_x, mouse_y = self.handle_input(check_rect, rap_rect, bet_rect, to_display=buttons)
 
         if is_over(check_rect, mouse_x, mouse_y):
             return False
@@ -63,18 +69,21 @@ class Player:
         elif is_over(rap_rect, mouse_x, mouse_y):  # handle betting and wrapping at the same time?????????????????
             self.has_rapped = True
             self.game.rapping_player = self
+            print("You rapped.")
             return False
 
         elif is_over(bet_rect, mouse_x, mouse_y):  # set a bet amount
             amount = self.set_amount()
+            print(f"You placed a bet of ${amount}.")
             return amount
 
-    def handle_input(self, *btns, betting=False, discarded=False, already_bet=False, placing_bet=False, bet_amount=0, final=False):
+    # display the appropriate buttons and piles for the player to make their decision 
+    def handle_input(self, *btns, to_display=None, bet_amount=0):
         while True:
-            self.game.display_all(betting=betting, has_discarded=discarded, already_bet=already_bet, placing_bet=placing_bet, bet_amount=bet_amount, final=final)
+            self.game.display_all(to_display=to_display, bet_amount=bet_amount)
             button_list = list(btns)
 
-            if final and rap_rect in button_list:  # handle the case where the player has already rapped and is placing a bet
+            if to_display == "final" and rap_rect in button_list:  # handle the case where the player has already rapped and is placing a bet
                 button_list.remove(rap_rect)
 
             for event in pygame.event.get():
@@ -87,30 +96,39 @@ class Player:
                         if is_over(rect, mouse_x, mouse_y):
                             return (mouse_x, mouse_y)  # the position of a mouse click that does something
 
+    # choose whether they want to raise or fold if a bet has already been made
     def handle_bet(self):  # returns a tuple (True if they fold, value amount of raise)
-        mouse_x, mouse_y = self.handle_input(fold_rect, check_rect, raise_rect, betting=True)
+        mouse_x, mouse_y = self.handle_input(fold_rect, check_rect, raise_rect, to_display="betting")
 
         if is_over(fold_rect, mouse_x, mouse_y):
+            print("You have folded.")
             return (True, 0)
         elif is_over(check_rect, mouse_x, mouse_y):
-            #self.money -= cur_bet
+            self.money -= self.game.current_bet
+            print("You have matched the bet")
             return (False, 0)
         elif is_over(raise_rect, mouse_x, mouse_y):
-            num = self.set_amount()  # change this later!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            print(f"You have raised by ${num}.")
+            num = self.set_amount() + self.game.current_bet
+            print("You have raised the bet.")
             return (False, num)
 
+    # choose whether to fold if someone raises after you
     def handle_already_bet(self):  # returns a boolean, will they fold
-        mouse_x, mouse_y = self.handle_input(check_rect, fold_rect, already_bet=True)
+        mouse_x, mouse_y = self.handle_input(check_rect, fold_rect, to_display="already bet")
 
         if is_over(check_rect, mouse_x, mouse_y):
+            self.money -= self.game.raise_amount
+            print("You have matched the bet.")
             return False
         elif is_over(fold_rect, mouse_x, mouse_y):
+            print("You have folded.")
             return True
 
-    def set_amount(self):
+    # helper method for player to select how much to bet
+    def set_amount(self, button="placing bet"):
+        rect = place_rect if button == "placing bet" else ante_rect  # choose the message to display
         amount = 5
-        input_x, input_y = self.handle_input(plus_rect, minus_rect, place_rect, placing_bet=True, bet_amount=amount)
+        input_x, input_y = self.handle_input(plus_rect, minus_rect, rect, to_display=button, bet_amount=amount)
         while not is_over(place_rect, input_x, input_y) or self.money <= amount:
             if is_over(plus_rect, input_x, input_y):
                 amount += 5
@@ -118,16 +136,14 @@ class Player:
                 amount -= 5
             elif self.money <= amount:
                 print(f"You don't have ${amount}.")
-            input_x, input_y = self.handle_input(plus_rect, minus_rect, place_rect, placing_bet=True, bet_amount=amount)
+            input_x, input_y = self.handle_input(plus_rect, minus_rect, rect, to_display=button, bet_amount=amount)
 
         self.money -= amount
         self.game.pot += amount
         return amount
 
-    def set_ante(self):
-        pass
-
-def is_over(rect, x, y):
-    left = rect[0]
-    top = rect[1]
-    return left < x < left + rect[2] and top < y < top + rect[3]
+    # set the ante when the player is the dealer
+    def set_ante(self):  # return the amount of the ante
+        ante = self.set_amount(button="ante")
+        print(f"You set the ante to ${ante}.")
+        return ante

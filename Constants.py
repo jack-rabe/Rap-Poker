@@ -3,12 +3,18 @@ import pygame
 
 pygame.init()
 
+def is_over(rect, x, y):
+    left = rect[0]
+    top = rect[1]
+    return left < x < left + rect[2] and top < y < top + rect[3]
+
 check_rect = (25, 585, 125, 40)  # button rectangles
 raise_rect = (25, 630, 125, 40)
 rap_rect = raise_rect
 fold_rect = (25, 675, 125, 40)
 bet_rect = fold_rect
 place_rect = (10, 675, 150, 40)
+ante_rect = (10, 675, 150, 40)
 minus_rect = (170, 703, 25, 25)
 plus_rect = (170, 663, 25, 25)
 play_rect = (300, 414, 150, 50)  # menu button rectangeles
@@ -46,6 +52,7 @@ rap_msg = BTN_FONT.render('Rap', True, BLACK)
 plus_msg = BTN_FONT.render('+', True, BLACK)  # place bet messages
 minus_msg = BTN_FONT.render('-', True, BLACK)
 place_msg = BTN_FONT.render("Place Bet", True, BLACK)
+ante_msg = BTN_FONT.render("Set Ante", True, BLACK)
 title_msg = TITLE_FONT.render('Rap Poker', False, BLACK)  # menu screen messages
 rules_msg = MENU_FONT.render('Rules', True, BLACK)
 play_msg = MENU_FONT.render('Play', True, BLACK)
