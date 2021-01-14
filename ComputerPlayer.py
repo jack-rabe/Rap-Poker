@@ -47,33 +47,46 @@ class ComputerPlayer(Player):
         window.blit(name_str, name_loc)
 
     def handle_draw(self):
-        # method stub!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        pass
+        # if :
+        #     dis_pile = self.game.discard_pile
+        #     self.hand.append(dis_pile.pop())  # it should never be empty when this is called
+        # else:  # draw from the unknown pile
+        self.hand.append(self.game.draw_card())
+        print(f"{self.name} drew from the draw pile.")
+
 
     def handle_discard(self):
-        pass
+        pop_index = 0
+        self.game.discard_pile.append(self.hand.pop(pop_index))
+        print(f"{self.name} discarded a card.")
 
     def set_bet(self, final=False):  # returns a boolean (placed a bet), final is unused just to overload the method
+        amount = 10
         if self.player_num == 2:
-            print(f"{self.name} placed a bet")
-            return 1
+            self.transfer_money(amount)
+            print(f"{self.name} placed a bet of ${amount}.")
+            self.game.current_bet = amount
+            return amount
+            
         return 0
 
     def handle_bet(self):
-        print(f"{self.name} raised the amount by $5")
-        return (False, 5)  # this is a stub
+        raise_amount = 5
+        self.transfer_money(self.game.current_bet + raise_amount)
+        print(f"{self.name} raised the amount by ${raise_amount}")
+        return (False, raise_amount)  # this is a stub
 
     def handle_already_bet(self):  # returns a boolean, will they fold
+        self.transfer_money(self.game.raise_amount)
         print(f"{self.name} has matched the bet")
         return False  
 
     def set_ante(self):
         amount= self.set_amount()
+        self.transfer_money(amount)
         print(f"{self.name} set the ante to ${amount}.")
         return amount
 
     def set_amount(self):  # doesn't need to be overloaded
         amount = 10
-        self.money -= amount
-        self.game.pot += amount
         return amount

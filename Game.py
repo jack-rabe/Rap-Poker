@@ -13,6 +13,8 @@ import time
 # allow negative $ amounts??????? only allow players to make bets that they can if they're setting it?
 # limit ante to the amount of money of the lowest player
 # make an actual ante button instead of place bet
+# handle all but one folding and folding in general
+
 
 
 class Game:
@@ -32,6 +34,8 @@ class Game:
             player.reset()
         self.rapping_player = False
         self.pot = 0
+        self.current_bet = 0
+        self.raise_amount = 0
 
         new_deck = session.get("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
         while new_deck.status_code != 200:
@@ -89,9 +93,9 @@ class Game:
         pos = (725 - x_length, 704)
         window.blit(text, pos)
 
-    @staticmethod  # check, raise, and fold
-    def display_bet_buttons():
-        Game.display_already_bet_buttons()
+    # check, raise, and fold, calls already_bet_buttons()
+    def display_bet_buttons(self):
+        self.display_already_bet_buttons()
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
         # draw the raise button
@@ -99,9 +103,9 @@ class Game:
         pygame.draw.rect(window, raise_color, raise_rect)
         window.blit(raise_msg, (47, 638))
 
-    @staticmethod
-    def display_already_bet_buttons():
+    def display_already_bet_buttons(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        self.display_current_bet()
 
         # draw the check button
         check_color = LIGHT_GRAY if is_over(check_rect, mouse_x, mouse_y) else GRAY
@@ -113,9 +117,9 @@ class Game:
         pygame.draw.rect(window, fold_color, fold_rect)
         window.blit(fold_msg, (55, 683))
 
-    @staticmethod  # check, rap, and bet
-    def display_prebet_buttons():
-        Game.display_final()
+    # check, rap, and bet
+    def display_prebet_buttons(self):
+        self.display_final()
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
         # draw the rap button
@@ -123,9 +127,10 @@ class Game:
         pygame.draw.rect(window, rap_color, rap_rect)
         window.blit(rap_msg, (58, 638))
 
-    @staticmethod # plus, minus, place_bet, and $ amount of bet
-    def display_plus_minus(bet_amount, button="place"):
+    # plus, minus, place_bet, and $ amount of bet
+    def display_plus_minus(self, bet_amount, button="place"):
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        self.display_current_bet()
 
         plus_color = LIGHT_GRAY if is_over(plus_rect, mouse_x, mouse_y) else GRAY
         pygame.draw.rect(window, plus_color, plus_rect)
@@ -145,13 +150,14 @@ class Game:
             window.blit(ante_msg, (28, 683))
             word = "Ante"
 
-        current_bet = MONEY_FONT.render(f"{word}: ${bet_amount}", True, BLACK)
-        offset = current_bet.get_size()[0] / 2
-        window.blit(current_bet, (90 - offset, 625))
+        bet_choice = MONEY_FONT.render(f"{word}: ${bet_amount}", True, BLACK)
+        offset = bet_choice.get_size()[0] / 2
+        window.blit(bet_choice, (90 - offset, 625))
 
-    @staticmethod # check and bet
-    def display_final():
+    # check and bet
+    def display_final(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        self.display_current_bet()
 
         # draw the check button
         check_color = LIGHT_GRAY if is_over(check_rect, mouse_x, mouse_y) else GRAY
@@ -163,27 +169,33 @@ class Game:
         pygame.draw.rect(window, bet_color, bet_rect)
         window.blit(bet_msg, (62, 683))
 
+    def display_current_bet(self):
+        bet = MONEY_FONT.render(f"Current Bet: ${self.current_bet}", True, BLACK)
+        offset = bet.get_size()[0] / 2
+        window.blit(bet, (375 - offset, 450))
+
     # only display method that updates display
-    def display_all(self, to_display=None, bet_amount=0): #betting=False, has_discarded=False,already_bet=False, placing_bet=False, bet_amount=0, final=False
-        window.fill(GREEN)  # update the graphics
+    def display_all(self, to_display=None, bet_amount=0):
+        window.fill(GREEN)
         self.display_pile()
         self.display_pot()
         for player in self.players:
             player.display_hand()
             player.display_name_and_money()
-
-        if to_display == "betting":
-            Game.display_bet_buttons()
-        elif to_display == "already bet":
-            Game.display_already_bet_buttons()
-        elif to_display == "discarded":
-            Game.display_prebet_buttons()
-        elif to_display == "final":
-            Game.display_final()
-        elif to_display == "placing bet":
-            Game.display_plus_minus(bet_amount)
-        elif to_display == "ante":
-            Game.display_plus_minus(bet_amount, button="ante")
+        
+        disp = to_display  # display the amount of the current betting round
+        if disp == "betting":
+            self.display_bet_buttons()
+        elif disp == "already bet":
+            self.display_already_bet_buttons()
+        elif disp == "discarded":
+            self.display_prebet_buttons()
+        elif disp == "final":
+            self.display_final()
+        elif disp == "placing bet":
+            self.display_plus_minus(bet_amount)
+        elif disp == "ante":
+            self.display_plus_minus(bet_amount, button="ante")
 
         pygame.display.update()
 
@@ -206,13 +218,15 @@ class Game:
                 self.raise_amount = raise_amount
                 self.current_bet += raise_amount
                 for player in already_moved:
-                    player.has_folded = player.handle_already_bet()  # get rid of the raise button for this!!!!!!!!!!!!!!!!!!!!!
+                    player.has_folded = player.handle_already_bet()
 
                     if player.has_folded:
                         already_moved.remove(player)  # is this part necessary!!!!!!!!!!!!!!!!!!!!!!!!!!!!       
 
-            already_moved.insert(0, cur_player)  # this maybe should be switched to append?
+            already_moved.insert(0, cur_player)  # this maybe should be switched to append???????????????????
             cur_index = cur_index + 1 if cur_index != 3 else 0  # next player
+        self.current_bet = 0
+        self.raise_amount = 0
 
     def play_hand(self):
         self.players = self.players[1:] + [self.players[0]]  # switch the dealer
@@ -221,8 +235,7 @@ class Game:
 
         ante = self.players[3].set_ante()
         for player in self.players[:3]:
-            player.money -= ante
-            self.pot += ante
+            player.transfer_money(ante)
 
         next_player_index = None
         run = True
@@ -246,11 +259,8 @@ class Game:
                     index = self.players.index(player)
                     next_player_index = index + 1 if index != 3 else 0
                     better_index = self.players.index(player)
-                    self.current_bet = bet
 
                     self.handle_all_bets(better_index)
-                    self.current_bet = 0
-                    self.raise_amount = 0
                 else:
                     next_player_index = None
                 print(f'{player.name} has finished their turn')
@@ -261,8 +271,8 @@ class Game:
         index = self.players.index(self.rapping_player)
         self.handle_all_bets(index)
 
-        # subtract the cash from the people and add it to the winner's account
-
+        winner = self.players[0]
+        winner.transfer_money(-self.pot)
 
         # show everyone's hand and the winner, switch this up later!!!!!!!!!!!!!!!
         for player in self.players:

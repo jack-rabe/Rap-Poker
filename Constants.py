@@ -33,8 +33,8 @@ LIGHT_GRAY = (150, 150, 150)  # color of selected buttons
 
 NAMES = {"Jim", "Tim", "Jenny", "Jorge", "Tyrone", "Kate", "Jerry", "Francis", "Riley", "Todd",
          "Lucy", "Frank", "Kylie", "Camila", "Alexa", "Alayna", "Carter", "Ankit", "Mark",
-         "Nathan", "Lauren", "Dylan", "Ava", "Matt", "Jacob", "Jeniffer, Seth, Bernie, Klaus,"
-        " Donna", "Phyllis", "Maddie", "Carly"}
+         "Nathan", "Lauren", "Dylan", "Ava", "Matt", "Jacob", "Jennifer", "Seth", "Bernie", "Klaus",
+        "Donna", "Phyllis", "Maddie", "Carly"}
 rules_txt = "Rap Poker is a card game played by four players ..."
 START_MONEY = 500
 

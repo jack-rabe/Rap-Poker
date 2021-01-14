@@ -74,6 +74,8 @@ class Player:
 
         elif is_over(bet_rect, mouse_x, mouse_y):  # set a bet amount
             amount = self.set_amount()
+            self.game.current_bet = amount
+            self.transfer_money(amount)
             print(f"You placed a bet of ${amount}.")
             return amount
 
@@ -104,27 +106,29 @@ class Player:
             print("You have folded.")
             return (True, 0)
         elif is_over(check_rect, mouse_x, mouse_y):
-            self.money -= self.game.current_bet
+            self.transfer_money(self.game.current_bet)
             print("You have matched the bet")
             return (False, 0)
         elif is_over(raise_rect, mouse_x, mouse_y):
-            num = self.set_amount() + self.game.current_bet
+            raise_amount = self.set_amount()
+            total = self.game.current_bet + raise_amount
+            self.transfer_money(total)
             print("You have raised the bet.")
-            return (False, num)
+            return (False, raise_amount)
 
     # choose whether to fold if someone raises after you
     def handle_already_bet(self):  # returns a boolean, will they fold
         mouse_x, mouse_y = self.handle_input(check_rect, fold_rect, to_display="already bet")
 
         if is_over(check_rect, mouse_x, mouse_y):
-            self.money -= self.game.raise_amount
+            self.transfer_money(self.game.raise_amount)
             print("You have matched the bet.")
             return False
         elif is_over(fold_rect, mouse_x, mouse_y):
             print("You have folded.")
             return True
 
-    # helper method for player to select how much to bet
+    # helper method for player to select how much to bet, does not handle the money tranfer
     def set_amount(self, button="placing bet"):
         rect = place_rect if button == "placing bet" else ante_rect  # choose the message to display
         amount = 5
@@ -138,12 +142,15 @@ class Player:
                 print(f"You don't have ${amount}.")
             input_x, input_y = self.handle_input(plus_rect, minus_rect, rect, to_display=button, bet_amount=amount)
 
-        self.money -= amount
-        self.game.pot += amount
         return amount
 
     # set the ante when the player is the dealer
     def set_ante(self):  # return the amount of the ante
         ante = self.set_amount(button="ante")
+        self.transfer_money(ante)
         print(f"You set the ante to ${ante}.")
         return ante
+
+    def transfer_money(self, amount):
+        self.money -= amount
+        self.game.pot += amount
