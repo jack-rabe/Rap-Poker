@@ -84,7 +84,7 @@ class ComputerPlayer(Player):
     def set_ante(self):
         amount= self.set_amount()
         self.transfer_money(amount)
-        print(f"{self.name} set the ante to ${amount}.")
+        self.add_message(f"{self.name} set the ante to ${amount}.")
         return amount
 
     def set_amount(self):  # doesn't need to be overloaded

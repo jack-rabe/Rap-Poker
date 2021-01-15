@@ -16,7 +16,6 @@ import time
 # handle all but one folding and folding in general
 
 
-
 class Game:
     def __init__(self):
         self.players = []  # list of 4 players
@@ -26,6 +25,7 @@ class Game:
         self.pot = 0
         self.current_bet = 0
         self.raise_amount = 0
+        self.msgs = []
 
     # handles resets and initial setup
     def deal(self):
@@ -36,6 +36,7 @@ class Game:
         self.pot = 0
         self.current_bet = 0
         self.raise_amount = 0
+        self.msgs = []
 
         new_deck = session.get("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
         while new_deck.status_code != 200:
@@ -60,6 +61,8 @@ class Game:
 
         # discard a single card before the game starts
         self.discard_pile.append(self.draw_card())
+        # reset the display
+        self.display_all()
 
     # draws a single card from the deck
     def draw_card(self):
@@ -130,7 +133,6 @@ class Game:
     # plus, minus, place_bet, and $ amount of bet
     def display_plus_minus(self, bet_amount, button="place"):
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        self.display_current_bet()
 
         plus_color = LIGHT_GRAY if is_over(plus_rect, mouse_x, mouse_y) else GRAY
         pygame.draw.rect(window, plus_color, plus_rect)
@@ -144,6 +146,7 @@ class Game:
             pygame.draw.rect(window, place_color, place_rect)
             window.blit(place_msg, (22, 683))
             word = "Bet"
+            self.display_current_bet()
         else:
             ante_color = LIGHT_GRAY if is_over(ante_rect, mouse_x, mouse_y) else GRAY
             pygame.draw.rect(window, ante_color, ante_rect)
@@ -174,11 +177,51 @@ class Game:
         offset = bet.get_size()[0] / 2
         window.blit(bet, (375 - offset, 450))
 
+    def display_msgs(self):
+        def display_msg(msg, line_num):
+            line_one = SIDE_BAR_FONT.render(msg, True, BLACK)
+            line_two = ""
+            words = msg.split()
+            x_pos, y_pos = 515, 15 + line_num * 25
+
+            while line_one.get_size()[0] > max_length:  # checks if the message needs to be displayed on a new line
+                line_two += (words[-1] + " ")
+                words = words[:-1]
+                line_one = "".join([word + " " for word in words])
+                line_one = SIDE_BAR_FONT.render(line_one, True, BLACK)
+
+            if len(line_two) == 0:
+                window.blit(line_one, (x_pos, y_pos))
+                return True
+            else:  # two lines are needed to display the message
+                reversed_list = []
+                for word in  line_two.split():
+                    reversed_list.insert(0, word)
+                line_two = "".join(word + " " for word in reversed_list)     #   reversed(line_two)
+                line_two = SIDE_BAR_FONT.render(line_two, True, BLACK)
+
+                window.blit(line_one, (x_pos, y_pos))
+                window.blit(line_two, (x_pos, y_pos + 25))
+                return False
+        if len(self.msgs) > 0:
+            pygame.draw.rect(window, WHITE, side_board_rect)
+            pygame.draw.rect(window, BLACK, side_board_rect, 2)
+
+        max_length = 222
+        line_num = 0
+        for msg in (self.msgs):
+            if not display_msg(msg, line_num):  # if it is two lines long, add 2
+                line_num += 1
+            line_num += 1
+            
+        
+
     # only display method that updates display
     def display_all(self, to_display=None, bet_amount=0):
         window.fill(GREEN)
         self.display_pile()
         self.display_pot()
+        self.display_msgs()
         for player in self.players:
             player.display_hand()
             player.display_name_and_money()
@@ -230,10 +273,11 @@ class Game:
 
     def play_hand(self):
         self.players = self.players[1:] + [self.players[0]]  # switch the dealer
-        print(f"{self.players[3].name} is dealing ...")
+        self.players[3].add_message(f"{self.players[3].name} is dealing ...")
         self.deal()
 
-        ante = self.players[3].set_ante()
+        dealer = self.players[3]
+        ante = dealer.set_ante()
         for player in self.players[:3]:
             player.transfer_money(ante)
 

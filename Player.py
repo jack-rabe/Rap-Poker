@@ -1,5 +1,6 @@
 import pygame
 import io
+import time
 from Constants import *
 
 def raw_card_back():  # load the image of the back of card
@@ -64,19 +65,20 @@ class Player:
         mouse_x, mouse_y = self.handle_input(check_rect, rap_rect, bet_rect, to_display=buttons)
 
         if is_over(check_rect, mouse_x, mouse_y):
+            self.add_message("You did not place a bet.")
             return False
 
         elif is_over(rap_rect, mouse_x, mouse_y):  # handle betting and wrapping at the same time?????????????????
             self.has_rapped = True
             self.game.rapping_player = self
-            print("You rapped.")
-            return False
+            self.add_message("You rapped.")
+            return 0
 
         elif is_over(bet_rect, mouse_x, mouse_y):  # set a bet amount
             amount = self.set_amount()
             self.game.current_bet = amount
             self.transfer_money(amount)
-            print(f"You placed a bet of ${amount}.")
+            self.add_message(f"You placed a bet of ${amount}.")
             return amount
 
     # display the appropriate buttons and piles for the player to make their decision 
@@ -103,30 +105,35 @@ class Player:
         mouse_x, mouse_y = self.handle_input(fold_rect, check_rect, raise_rect, to_display="betting")
 
         if is_over(fold_rect, mouse_x, mouse_y):
-            print("You have folded.")
-            return (True, 0)
+            msg = "You have folded."
+            to_return  = (True, 0)
         elif is_over(check_rect, mouse_x, mouse_y):
             self.transfer_money(self.game.current_bet)
-            print("You have matched the bet")
-            return (False, 0)
+            msg = "You have matched the bet"
+            to_return = (False, 0)
         elif is_over(raise_rect, mouse_x, mouse_y):
             raise_amount = self.set_amount()
             total = self.game.current_bet + raise_amount
             self.transfer_money(total)
-            print("You have raised the bet.")
-            return (False, raise_amount)
+            msg = "You have raised the bet by a ce amount." # change this later!!!!!!!!!!!!!!!!!!!!
+            to_return = (False, raise_amount)
+        
+        self.add_message(msg)
+        return to_return
 
     # choose whether to fold if someone raises after you
     def handle_already_bet(self):  # returns a boolean, will they fold
         mouse_x, mouse_y = self.handle_input(check_rect, fold_rect, to_display="already bet")
-
         if is_over(check_rect, mouse_x, mouse_y):
             self.transfer_money(self.game.raise_amount)
-            print("You have matched the bet.")
-            return False
+            msg = "You have matched the bet."
+            to_return = False
         elif is_over(fold_rect, mouse_x, mouse_y):
-            print("You have folded.")
-            return True
+            msg = "You have folded."
+            to_return = True
+
+        self.add_message(msg)
+        return to_return
 
     # helper method for player to select how much to bet, does not handle the money tranfer
     def set_amount(self, button="placing bet"):
@@ -148,9 +155,16 @@ class Player:
     def set_ante(self):  # return the amount of the ante
         ante = self.set_amount(button="ante")
         self.transfer_money(ante)
-        print(f"You set the ante to ${ante}.")
+        self.add_message(f"You set the ante to ${ante}.")
         return ante
 
+    # helper method to move money from this player to the pot
     def transfer_money(self, amount):
         self.money -= amount
         self.game.pot += amount
+    
+    def add_message(self, msg):
+        messages = self.game.msgs
+        messages.append(msg)
+        if len(messages) > 5:
+            messages.pop(0)

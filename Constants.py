@@ -8,6 +8,7 @@ def is_over(rect, x, y):
     top = rect[1]
     return left < x < left + rect[2] and top < y < top + rect[3]
 
+side_board_rect = (510, 10, 230, 205)
 check_rect = (25, 585, 125, 40)  # button rectangles
 raise_rect = (25, 630, 125, 40)
 rap_rect = raise_rect
@@ -17,7 +18,7 @@ place_rect = (10, 675, 150, 40)
 ante_rect = (10, 675, 150, 40)
 minus_rect = (170, 703, 25, 25)
 plus_rect = (170, 663, 25, 25)
-play_rect = (300, 414, 150, 50)  # menu button rectangeles
+play_rect = (300, 414, 150, 50)  # menu button rectangles
 rules_rect = (300, 480, 150, 50)
 draw_pile_rect = (270, 300, 90, 125)  # location of the hand and piles
 dp_rect = (375, 300, 93, 127)
@@ -43,6 +44,7 @@ MONEY_FONT = pygame.font.SysFont(None, 30)
 TITLE_FONT = pygame.font.SysFont(None, 75, True)
 MENU_FONT = pygame.font.SysFont(None, 60)
 BTN_FONT = pygame.font.SysFont(None, 40)
+SIDE_BAR_FONT = pygame.font.SysFont(None, 22)
 
 check_msg = BTN_FONT.render('Check', True, BLACK)  # betting messages
 raise_msg = BTN_FONT.render('Raise', True, BLACK)
@@ -60,8 +62,9 @@ play_msg = MENU_FONT.render('Play', True, BLACK)
 # create the game window
 WIDTH = 750
 HEIGHT = 750
-window = pygame.display.set_mode([WIDTH, HEIGHT])
 pygame.display.set_caption('Rap Poker')
-#pygame.display.set_icon(card_back) decide on this later!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+card_icon = pygame.image.load("mono-package-games-cards.png")  # maybe change this later????????
+pygame.display.set_icon(card_icon)
+window = pygame.display.set_mode([WIDTH, HEIGHT])
 
 session = requests.Session()
