@@ -1,6 +1,12 @@
 from Game import *
-from Constants import rules_txt
 import ctypes  # creates the rules message box
+
+rules_txt = "Rap Poker is a card game played by four players. At the beginning of each game, the dealer \
+sets the ante and deals five cards to each player. One card is flipped over to form the discard pile. \
+The player to the left of the dealer is then given the opportunity to draw one card from the discard pile or \
+draw pile. The player then discards a single card and has the opportunity to place a bet or rap before ending \
+their turn. Play proceeds clockwise until someone raps. When a player raps, every other player gets one more turn \
+before the final betting round. The winner takes the entire pot and is determined by standard poker scoring."
 
 def draw_menu():
     def draw_bg():
@@ -10,11 +16,13 @@ def draw_menu():
     def draw_play_btn(x, y):
         color = LIGHT_GRAY if is_over(play_rect, x, y) else GRAY
         pygame.draw.rect(window, color, play_rect)
+        pygame.draw.rect(window, BLACK, play_rect, 2)
         window.blit(play_msg, (330, 420))
 
     def draw_rules_btn(x, y):
         color = LIGHT_GRAY if is_over(rules_rect, x, y) else GRAY
         pygame.draw.rect(window, color, rules_rect)
+        pygame.draw.rect(window, BLACK, rules_rect, 2)
         window.blit(rules_msg, (320, 487))
 
     running = True

@@ -1,5 +1,6 @@
-from Player import Player, window, rotated_card_back, card_back, NAME_FONT, BLACK, is_over
+from Player import Player, window, rotated_card_back, card_back, NAME_FONT, BLACK, WHITE, is_over
 import pygame
+import time
 
 class ComputerPlayer(Player):
     def __init__(self, name, game, player_num):
@@ -31,8 +32,9 @@ class ComputerPlayer(Player):
                     window.blit(rotated_card_back, (550, 225 + (index * 40)))
 
     def display_name_and_money(self):
-        name_str = NAME_FONT.render(f"{self.name}  ${self.money}", True, BLACK)
-        x_size, y_size = name_str.get_size()  # account for varying string sizes
+        color = WHITE if self.is_turn else BLACK
+        name_str = NAME_FONT.render(f"{self.name}  ${self.money}", True, color)
+        x_size = name_str.get_size()[0]  # account for varying string sizes
         offset =  x_size / 2
 
         if self.player_num == 1:
@@ -51,42 +53,60 @@ class ComputerPlayer(Player):
         #     dis_pile = self.game.discard_pile
         #     self.hand.append(dis_pile.pop())  # it should never be empty when this is called
         # else:  # draw from the unknown pile
+        self.slow_turn()
         self.hand.append(self.game.draw_card())
         print(f"{self.name} drew from the draw pile.")
-
+        self.slow_turn()
 
     def handle_discard(self):
+        self.slow_turn()
         pop_index = 0
         self.game.discard_pile.append(self.hand.pop(pop_index))
         print(f"{self.name} discarded a card.")
+        self.slow_turn()
 
     def set_bet(self, final=False):  # returns a boolean (placed a bet), final is unused just to overload the method
+        self.slow_turn()
         amount = 10
-        if self.player_num == 2:
-            self.transfer_money(amount)
-            print(f"{self.name} placed a bet of ${amount}.")
-            self.game.current_bet = amount
-            return amount
-            
+        # if self.player_num == 2:  # player 2 always bets, no one else does
+        #     self.transfer_money(amount)
+        #     self.add_message(f"{self.name} placed a bet of ${amount}.")
+        #     self.game.current_bet = amount
+        # else:
+        #     self.add_message(f"{self.name} did not place a bet.")
+        #     amount = 0
+        
+        self.slow_turn()
         return 0
 
     def handle_bet(self):
-        raise_amount = 5
-        self.transfer_money(self.game.current_bet + raise_amount)
-        print(f"{self.name} raised the amount by ${raise_amount}")
-        return (False, raise_amount)  # this is a stub
+        # self.slow_turn()
+        # raise_amount = 5
+        # self.transfer_money(self.game.current_bet + raise_amount)
+        # self.add_message(f"{self.name} raised the amount by ${raise_amount}.")
+
+        self.slow_turn()
+        return (False, 0)  # this is a stub
 
     def handle_already_bet(self):  # returns a boolean, will they fold
+        self.slow_turn()
         self.transfer_money(self.game.raise_amount)
-        print(f"{self.name} has matched the bet")
+        self.add_message(f"{self.name} has matched the bet.")
+        self.slow_turn()
         return False  
 
     def set_ante(self):
+        self.slow_turn()
         amount= self.set_amount()
         self.transfer_money(amount)
         self.add_message(f"{self.name} set the ante to ${amount}.")
+        self.slow_turn()
         return amount
 
     def set_amount(self):  # doesn't need to be overloaded
         amount = 10
         return amount
+
+    def slow_turn(self):
+        time.sleep(.25)
+        self.game.display_all()

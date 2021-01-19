@@ -8,7 +8,7 @@ def is_over(rect, x, y):
     top = rect[1]
     return left < x < left + rect[2] and top < y < top + rect[3]
 
-side_board_rect = (510, 10, 230, 205)
+side_board_rect = (510, 10, 230, 180)
 check_rect = (25, 585, 125, 40)  # button rectangles
 raise_rect = (25, 630, 125, 40)
 rap_rect = raise_rect
@@ -36,7 +36,6 @@ NAMES = {"Jim", "Tim", "Jenny", "Jorge", "Tyrone", "Kate", "Jerry", "Francis", "
          "Lucy", "Frank", "Kylie", "Camila", "Alexa", "Alayna", "Carter", "Ankit", "Mark",
          "Nathan", "Lauren", "Dylan", "Ava", "Matt", "Jacob", "Jennifer", "Seth", "Bernie", "Klaus",
         "Donna", "Phyllis", "Maddie", "Carly"}
-rules_txt = "Rap Poker is a card game played by four players ..."
 START_MONEY = 500
 
 NAME_FONT = pygame.font.SysFont(None, 30)

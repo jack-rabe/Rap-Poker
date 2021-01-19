@@ -23,12 +23,14 @@ class Player:
         self.money = START_MONEY
         self.has_folded = False
         self.has_rapped = False
+        self.is_turn = False
 
     # resets all of the necessary instance variables
     def reset(self):
         self.hand = []
         self.has_folded = False
         self.has_rapped = False
+        self.is_turn = False
 
     # shows the cards of the human player
     def display_hand(self, show_front=True):  # show front is only for overloading
@@ -38,7 +40,8 @@ class Player:
 
     # shows the human player's name and amount of money
     def display_name_and_money(self):
-        name_str = NAME_FONT.render(f"{self.name}  ${self.money}", True, BLACK)
+        color = WHITE if self.is_turn else BLACK
+        name_str = NAME_FONT.render(f"{self.name}  ${self.money}", True, color)
         window.blit(name_str, (330, 690))
 
     # draw a card from either the discard or draw pile
@@ -62,6 +65,8 @@ class Player:
     # choose whether to set a bet and how much to set it for
     def set_bet(self, final=False):  # returns 0 if no bet is made (or is wrapping) else returns the amount of the bet
         buttons = "final" if final else "discarded"
+        if self.money <= 0:  # skip turn if out of money
+            self.add_message("You did not place a bet.")
         mouse_x, mouse_y = self.handle_input(check_rect, rap_rect, bet_rect, to_display=buttons)
 
         if is_over(check_rect, mouse_x, mouse_y):
@@ -102,6 +107,8 @@ class Player:
 
     # choose whether they want to raise or fold if a bet has already been made
     def handle_bet(self):  # returns a tuple (True if they fold, value amount of raise)
+        if self.money <= 0:
+            return (self.handle_already_bet, 0)
         mouse_x, mouse_y = self.handle_input(fold_rect, check_rect, raise_rect, to_display="betting")
 
         if is_over(fold_rect, mouse_x, mouse_y):
@@ -109,13 +116,13 @@ class Player:
             to_return  = (True, 0)
         elif is_over(check_rect, mouse_x, mouse_y):
             self.transfer_money(self.game.current_bet)
-            msg = "You have matched the bet"
+            msg = "You have matched the bet."
             to_return = (False, 0)
         elif is_over(raise_rect, mouse_x, mouse_y):
             raise_amount = self.set_amount()
             total = self.game.current_bet + raise_amount
             self.transfer_money(total)
-            msg = "You have raised the bet by a ce amount." # change this later!!!!!!!!!!!!!!!!!!!!
+            msg = f"You have raised the bet by ${raise_amount}."
             to_return = (False, raise_amount)
         
         self.add_message(msg)
@@ -136,24 +143,30 @@ class Player:
         return to_return
 
     # helper method for player to select how much to bet, does not handle the money tranfer
-    def set_amount(self, button="placing bet"):
+    def set_amount(self, button="placing bet", max_bet=2000):
         rect = place_rect if button == "placing bet" else ante_rect  # choose the message to display
+        max_bet = min(self.money, max_bet)
         amount = 5
+
         input_x, input_y = self.handle_input(plus_rect, minus_rect, rect, to_display=button, bet_amount=amount)
-        while not is_over(place_rect, input_x, input_y) or self.money <= amount:
+        while not is_over(place_rect, input_x, input_y) or max_bet < amount:
             if is_over(plus_rect, input_x, input_y):
                 amount += 5
-            elif amount > 5:
+            elif is_over(minus_rect, input_x, input_y) and amount > 5:
                 amount -= 5
-            elif self.money <= amount:
-                print(f"You don't have ${amount}.")
+            elif amount >= max_bet:
+                amount = max_bet
             input_x, input_y = self.handle_input(plus_rect, minus_rect, rect, to_display=button, bet_amount=amount)
 
         return amount
 
     # set the ante when the player is the dealer
     def set_ante(self):  # return the amount of the ante
-        ante = self.set_amount(button="ante")
+        least_money = 2000
+        for player in self.game.players:
+            least_money = min(least_money, player.money)  # limit the ante to the lowest amount any player has
+
+        ante = self.set_amount(button="ante", max_bet=least_money)
         self.transfer_money(ante)
         self.add_message(f"You set the ante to ${ante}.")
         return ante
@@ -166,5 +179,3 @@ class Player:
     def add_message(self, msg):
         messages = self.game.msgs
         messages.append(msg)
-        if len(messages) > 5:
-            messages.pop(0)
