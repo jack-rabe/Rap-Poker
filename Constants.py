@@ -1,5 +1,6 @@
 import requests
 import pygame
+import os
 
 pygame.init()
 
@@ -66,8 +67,12 @@ quit_msg = MENU_FONT.render("Quit", True, BLACK)
 WIDTH = 750
 HEIGHT = 750
 pygame.display.set_caption('Rap Poker')
-card_icon = pygame.image.load("mono-package-games-cards.png")  # maybe change this later????????
+
+dir_name = os.path.dirname(__file__)
+file_name = os.path.join(dir_name, "./images/mono-package-games-cards.png")
+card_icon = pygame.image.load(file_name)
 pygame.display.set_icon(card_icon)
+
 window = pygame.display.set_mode([WIDTH, HEIGHT])
 
 session = requests.Session()
