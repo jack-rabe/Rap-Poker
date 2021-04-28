@@ -8,6 +8,29 @@ draw pile. The player then discards a single card and has the opportunity to pla
 their turn. Play proceeds clockwise until someone raps. When a player raps, every other player gets one more turn \
 before the final betting round. The winner takes the entire pot and is determined by standard poker scoring."
 
+def draw_final_screen():
+    while True:
+        window.fill(GREEN)
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        # play again button
+        again_color = LIGHT_GRAY if is_over(again_rect, mouse_x, mouse_y) else GRAY
+        pygame.draw.rect(window, again_color, again_rect)
+        pygame.draw.rect(window, BLACK, again_rect, 2)
+        window.blit(again_msg, (270, 346))
+        # quit button
+        quit_color = LIGHT_GRAY if is_over(quit_rect, mouse_x, mouse_y) else GRAY
+        pygame.draw.rect(window, quit_color, quit_rect)
+        pygame.draw.rect(window, BLACK, quit_rect, 2)
+        window.blit(quit_msg, (327, 412))
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or event.type == pygame.MOUSEBUTTONDOWN and is_over(quit_rect, mouse_x, mouse_y):
+                pygame.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN and is_over(again_rect, mouse_x, mouse_y):
+                   start_game()  # restart another game
+
+
 def draw_menu():
     def draw_bg():
         window.fill(GREEN)
@@ -45,6 +68,9 @@ def draw_menu():
 
         pygame.display.update()
 
+    start_game()
+
+def start_game():
     game = Game()  # start game and initialize all players
     player = Player("You", game)
     game.players.append(player)
@@ -52,7 +78,10 @@ def draw_menu():
         new_name = NAMES.pop()
         game.players.append(ComputerPlayer(new_name, game, i))
 
-    while True:  # this temp!!!!!!!!!!!!
-        game.play_hand()
+    while game.play_hand():
+        pass
+
+    draw_final_screen()
+
 
 draw_menu()

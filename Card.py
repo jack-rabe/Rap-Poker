@@ -7,14 +7,14 @@ class Card:
         self.value = value
         self.suit = suit
 
-        # # convert the image to a file-like object and load it using pygame
+        # convert the image to a file-like object and load it using pygame
         image_url = session.get(image)
         img = io.BytesIO(image_url.content)
         temp_image = pygame.image.load(img)
         self.image = pygame.transform.rotozoom(temp_image, 0, 0.4)
 
-    def __str__(self):  # returns a str representation of length 2 (or 3 in the case of  a 10)
-        value = self.value[0] if self.value != "10" else "10"
+    def __str__(self):  # returns a str representation of length 2 (0? for a 10)
+        value = self.value[0] if self.value != "10" else "0"
         return value + self.suit[0]
 
     def __eq__(self, other):

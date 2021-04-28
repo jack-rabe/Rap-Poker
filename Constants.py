@@ -23,6 +23,9 @@ rules_rect = (300, 480, 150, 50)
 draw_pile_rect = (270, 300, 90, 125)  # location of the hand and piles
 dp_rect = (375, 300, 93, 127)
 hand_rect = (180, 525, 465, 125)
+again_rect = (250, 340, 250, 50) # final screen buttons
+quit_rect = (301, 405, 150, 50)
+
 
 GREEN = (0, 200, 0)  # background color
 BLUE = (0, 0, 255)
@@ -35,9 +38,8 @@ LIGHT_GRAY = (150, 150, 150)  # color of selected buttons
 NAMES = {"Jim", "Tim", "Jenny", "Jorge", "Tyrone", "Kate", "Jerry", "Francis", "Riley", "Todd",
          "Lucy", "Frank", "Kylie", "Camila", "Alexa", "Alayna", "Carter", "Ankit", "Mark",
          "Nathan", "Lauren", "Dylan", "Ava", "Matt", "Jacob", "Jennifer", "Seth", "Bernie", "Klaus",
-        "Donna", "Phyllis", "Maddie", "Carly"}
-START_MONEY = 500
-
+        "Donna", "Phyllis", "Maddie", "Carly", "Brian", "Amanda"}
+START_MONEY = 250
 NAME_FONT = pygame.font.SysFont(None, 30)
 MONEY_FONT = pygame.font.SysFont(None, 30)
 TITLE_FONT = pygame.font.SysFont(None, 75, True)
@@ -57,6 +59,8 @@ ante_msg = BTN_FONT.render("Set Ante", True, BLACK)
 title_msg = TITLE_FONT.render('Rap Poker', False, BLACK)  # menu screen messages
 rules_msg = MENU_FONT.render('Rules', True, BLACK)
 play_msg = MENU_FONT.render('Play', True, BLACK)
+again_msg = MENU_FONT.render("Play Again", True, BLACK)  # final screen messages
+quit_msg = MENU_FONT.render("Quit", True, BLACK)
 
 # create the game window
 WIDTH = 750

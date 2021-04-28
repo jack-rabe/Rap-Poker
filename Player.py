@@ -41,6 +41,8 @@ class Player:
     # shows the human player's name and amount of money
     def display_name_and_money(self):
         color = WHITE if self.is_turn else BLACK
+        if self.has_folded:
+            color = RED
         name_str = NAME_FONT.render(f"{self.name}  ${self.money}", True, color)
         window.blit(name_str, (330, 690))
 
@@ -63,17 +65,22 @@ class Player:
         self.game.discard_pile.append(self.hand.pop(pop_index))
 
     # choose whether to set a bet and how much to set it for
-    def set_bet(self, final=False):  # returns 0 if no bet is made (or is wrapping) else returns the amount of the bet
-        buttons = "final" if final else "discarded"
-        if self.money <= 0:  # skip turn if out of money
+    def set_bet(self, can_rap = True):  # returns 0 if no bet is made (or is wrapping) else returns the amount of the bet
+        if self.money <= 0:  # skip turn if out of money!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             self.add_message("You did not place a bet.")
-        mouse_x, mouse_y = self.handle_input(check_rect, rap_rect, bet_rect, to_display=buttons)
+            return 0
+
+        buttons = "discarded" if can_rap else "final"
+        if can_rap:
+            mouse_x, mouse_y = self.handle_input(check_rect, rap_rect, bet_rect, to_display=buttons)
+        else:
+            mouse_x, mouse_y = self.handle_input(check_rect, bet_rect, to_display=buttons)
 
         if is_over(check_rect, mouse_x, mouse_y):
             self.add_message("You did not place a bet.")
-            return False
+            return 0
 
-        elif is_over(rap_rect, mouse_x, mouse_y):  # handle betting and wrapping at the same time?????????????????
+        elif is_over(rap_rect, mouse_x, mouse_y):
             self.has_rapped = True
             self.game.rapping_player = self
             self.add_message("You rapped.")
