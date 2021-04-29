@@ -1,23 +1,20 @@
-from Game import *
+from Game import window, Game, Player, ComputerPlayer
+from Constants import rules_txt, is_over, NAMES
+from Constants import again_rect, again_msg, quit_rect, quit_msg, rules_rect, rules_msg, play_rect, title_msg, play_msg
+from Constants import LIGHT_GRAY, BLACK, GRAY, GREEN
 import ctypes  # creates the rules message box
-
-rules_txt = "Rap Poker is a card game played by four players. At the beginning of each game, the dealer \
-sets the ante and deals five cards to each player. One card is flipped over to form the discard pile. \
-The player to the left of the dealer is then given the opportunity to draw one card from the discard pile or \
-draw pile. The player then discards a single card and has the opportunity to place a bet or rap before ending \
-their turn. Play proceeds clockwise until someone raps. When a player raps, every other player gets one more turn \
-before the final betting round. The winner takes the entire pot and is determined by standard poker scoring."
+import pygame
 
 def draw_final_screen():
     while True:
         window.fill(GREEN)
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        # play again button
+        # draw play again button
         again_color = LIGHT_GRAY if is_over(again_rect, mouse_x, mouse_y) else GRAY
         pygame.draw.rect(window, again_color, again_rect)
         pygame.draw.rect(window, BLACK, again_rect, 2)
         window.blit(again_msg, (270, 346))
-        # quit button
+        # draw quit button
         quit_color = LIGHT_GRAY if is_over(quit_rect, mouse_x, mouse_y) else GRAY
         pygame.draw.rect(window, quit_color, quit_rect)
         pygame.draw.rect(window, BLACK, quit_rect, 2)
@@ -78,10 +75,10 @@ def start_game():
         new_name = NAMES.pop()
         game.players.append(ComputerPlayer(new_name, game, i))
 
-    while game.play_hand():
+    while game.play_hand(): # continues until one player remains
         pass
 
-    draw_final_screen()
+    draw_final_screen()  # allow players to quit or start new game
 
 
 draw_menu()

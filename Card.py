@@ -10,10 +10,10 @@ class Card:
         # convert the image to a file-like object and load it using pygame
         image_url = session.get(image)
         img = io.BytesIO(image_url.content)
-        temp_image = pygame.image.load(img)
-        self.image = pygame.transform.rotozoom(temp_image, 0, 0.4)
+        self.image = pygame.image.load(img)
+        self.image = pygame.transform.rotozoom(self.image, 0, 0.4)
 
-    def __str__(self):  # returns a str representation of length 2 (0? for a 10)
+    def __str__(self):  # returns a str representation of length 2
         value = self.value[0] if self.value != "10" else "0"
         return value + self.suit[0]
 
@@ -29,7 +29,4 @@ class Card:
         if other_val in royalty:
             other_val = 11 + royalty.index(other_val)
 
-        if int(val) - int(other_val) >= 0:
-            return False
-        else:
-            return True
+        return int(val) - int(other_val) < 0
