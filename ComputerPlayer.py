@@ -100,21 +100,19 @@ class ComputerPlayer(Player):
 
     def set_bet(self, can_rap=True):  # returns a number (amount of bet)
         self.slow_turn()
-        if self.money <= 0:  # skip turn if out of money!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            self.add_message(f"{self.name} did not place a bet.")
+        # if self.money <= 0:  # skip turn if out of money
+        #     self.add_message(f"{self.name} did not place a bet.")
+        #     return 0
+        current_hand_val = self.game.hand_val(self.hand)[0] # number from 0-9
+        if can_rap and (current_hand_val >= 4 or random.randrange(100) < 5): # rap if hand is good, and sometimes randomly
+            self.has_rapped = True
+            self.game.rapping_player = self
+            self.add_message(f"{self.name} rapped.")
+            self.slow_turn()
             return 0
 
-        if can_rap:
-            current_hand_val = self.game.hand_val(self.hand)[0] # number from 0-9
-            if current_hand_val >= 4: # rap if hand is good, sometimes randomly, increase with num_turns!!!!!!!!!!!!!!!! add random chance
-                self.has_rapped = True
-                self.game.rapping_player = self
-                self.add_message(f"{self.name} rapped.")
-                self.slow_turn()
-                return 0
-
-        if self.determine_value(self.hand) >= (15 + self.game.turn_num * 5) and random.randint(0, 1) == 1: # choose to bet, adjust!!!!!!!!!!!!!!!!!!!!!
-            amount = random.randrange(5, 30, 5)  # account for hand value here!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if self.determine_value(self.hand) >= (15 + self.game.turn_num * 5) and random.randint(0, 1) == 1: # choose to bet
+            amount = random.randrange(5, 25, 5) + ((current_hand_val + 1) // 2 * 5)
             self.game.current_bet = amount
             self.transfer_money(amount)
             self.add_message(f"{self.name} bet ${amount}.")
@@ -127,10 +125,12 @@ class ComputerPlayer(Player):
             return 0
 
     def handle_bet(self):
+        current_hand_val = self.game.hand_val(self.hand)[0] # number from 0-9
         self.slow_turn()
-        random_num = random.randint(0, 100)# make this actually mean something!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        
+        random_num = random.randint(0, 100)# TODO make this actually mean something
         if random_num < 10:  # raise
-            raise_amount = random.randrange(5, 20, 5)  # account for hand value here!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            raise_amount = random.randrange(5, 20, 5)  # TODO account for hand value here
             self.game.raise_amount = raise_amount
             self.transfer_money(self.game.current_bet + raise_amount)
             self.add_message(f"{self.name} raised the amount by ${raise_amount}.")

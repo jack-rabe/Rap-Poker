@@ -4,7 +4,7 @@ import os
 import io
 
 pygame.init()
-START_MONEY = 20
+START_MONEY = 500
 WIDTH = 750
 HEIGHT = 750
 pygame.display.set_caption('Rap Poker')

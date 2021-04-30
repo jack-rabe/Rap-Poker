@@ -5,6 +5,7 @@ Then, all the other players get one more turn before a final betting round.
 
 
 # Installation:
+Note: requires Python version 3.8 and pygame version 2.0
 `pip install pygame`
 
 # Playing:

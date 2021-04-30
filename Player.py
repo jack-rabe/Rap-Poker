@@ -55,8 +55,10 @@ class Player:
 
     # choose whether to set a bet and how much to set it for
     def set_bet(self, can_rap = True):  # returns 0 if no bet is made (or is wrapping) else returns the amount of the bet
-        if self.money <= 0:  # skip turn if out of money!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            can_bet = False  #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! modify here to fix bug
+        # if self.money <= 0:  # skip turn if out of money
+        #     self.add_message(f"{self.name} did not place a bet.")
+        #     return 0
+            
 
         buttons = "discarded" if can_rap else "final"
         if can_rap:
