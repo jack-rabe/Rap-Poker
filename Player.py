@@ -3,17 +3,6 @@ import io
 import time
 from Constants import *
 
-def raw_card_back():  # load the image of the back of card
-    card_image_url = session.get("http://res.freestockphotos.biz/originals/15/15686-illustration-of-a-play-card-"
-                                 "back-or.png")
-    img = io.BytesIO(card_image_url.content)
-    return pygame.image.load(img)
-
-raw_card_back = raw_card_back()
-card_back = pygame.transform.rotozoom(raw_card_back, 0, 0.04)  # scale the image for the players
-dp_card_back = pygame.transform.rotozoom(raw_card_back, 0, 0.0425)  # scale the image for the draw pile !!!!!!!!!
-rotated_card_back = pygame.transform.rotate(card_back, 90)
-
 
 class Player:
     def __init__(self, name, game):
@@ -67,8 +56,7 @@ class Player:
     # choose whether to set a bet and how much to set it for
     def set_bet(self, can_rap = True):  # returns 0 if no bet is made (or is wrapping) else returns the amount of the bet
         if self.money <= 0:  # skip turn if out of money!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            self.add_message("You did not place a bet.")
-            return 0
+            can_bet = False  #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! modify here to fix bug
 
         buttons = "discarded" if can_rap else "final"
         if can_rap:

@@ -1,4 +1,4 @@
-from Player import Player, window, rotated_card_back, card_back, NAME_FONT, BLACK, WHITE, RED, is_over
+from Player import Player, window, rotated_card_back, card_back, NAME_FONT, BLACK, WHITE, RED
 import pygame
 import time
 import random

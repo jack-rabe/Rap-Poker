@@ -1,6 +1,7 @@
 import requests
 import pygame
 import os
+import io
 
 pygame.init()
 START_MONEY = 20
@@ -90,3 +91,12 @@ quit_msg = MENU_FONT.render("Quit", True, BLACK)
 
 window = pygame.display.set_mode([WIDTH, HEIGHT])  # display screen
 session = requests.Session()
+
+# load the image of the back of card
+card_image_url = session.get("http://res.freestockphotos.biz/originals/15/15686-illustration-of-a-play-card-"
+                                "back-or.png")
+img = io.BytesIO(card_image_url.content)
+raw_card_back = pygame.image.load(img)
+card_back = pygame.transform.rotozoom(raw_card_back, 0, 0.04)  # scale the image for the players
+dp_card_back = pygame.transform.rotozoom(raw_card_back, 0, 0.0425)  # scale the image for the draw pile
+rotated_card_back = pygame.transform.rotate(card_back, 90)

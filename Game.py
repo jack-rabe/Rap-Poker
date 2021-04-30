@@ -4,19 +4,6 @@ from ComputerPlayer import ComputerPlayer
 import time
 import pygame
 
-# rework naming conventions for display!/ general refactoring
-# ensure png is imported correctly
-# handle duplicate hands except suit
-# change add message to static????
-# all in betting button????
-# show the status of hands at the end: be more specific
-#options menu/sounds?
-# account for better pairs = more points in the computer AI, change pre-rap behavior to select best final hand, fix straights!!!!!!!!!
-
-
-        # ADD BlUFFING
-        # different ideas for final betting, final drawing!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-
 
 class Game:
     def __init__(self):
@@ -427,7 +414,7 @@ class Game:
 
         return total_value # always a tuple
 
-    def determine_winner(self):  # handle duplicate hands of different suits!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    def determine_winner(self):
         hands = []
         temp_players = []
         for player in self.players:
@@ -480,9 +467,9 @@ class Game:
                     player.has_folded = player.handle_already_bet()
 
                     if player.has_folded:
-                        already_moved.remove(player)  # is this part necessary!!!!!!!!!!!!!!!!!!!!!!!!!!!!       
+                        already_moved.remove(player)      
 
-            already_moved.insert(0, cur_player)  # this maybe should be switched to append???????????????????
+            already_moved.insert(0, cur_player)
             cur_index = cur_index + 1 if cur_index != (len(self.players) - 1) else 0  # next player
 
         self.current_bet = 0
